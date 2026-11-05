@@ -6,6 +6,16 @@
 - 快速入口（自定义域）：**https://here.jiuyeke.cn**
 - 前端镜像（主站慢时的备用入口，数据同源）：**https://patient-mantle-hy5n.here.now/**
 
+## 界面预览
+
+**登录**（单口令保护）：
+
+![登录页](docs/screenshots/login.png)
+
+**主界面**（每日时间线 + 待办 + 近 14 天统计；图为演示数据）：
+
+![工作台主界面](docs/screenshots/dashboard.png)
+
 ## 功能
 
 - **每日记录**：一句话记一条「今天做了什么」，按日期时间线展示，回车快速录入
