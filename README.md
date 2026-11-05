@@ -2,9 +2,9 @@
 
 一个部署在 **Cloudflare Pages + D1** 的个人工作台：**记录每天做了什么、还要做什么**。
 
-- 线上地址（主站）：**https://gongzuotai.pages.dev**
+- 线上地址（主站）：**https://gongzuotai-86d.pages.dev**
 - 快速入口（自定义域）：**https://here.jiuyeke.cn**
-- 前端镜像（主站慢时的备用入口，数据同源）：见 [here.now 镜像](#镜像)
+- 前端镜像（主站慢时的备用入口，数据同源）：**https://patient-mantle-hy5n.here.now/**
 
 ## 功能
 
@@ -30,7 +30,7 @@ wrangler.toml            ← 项目与 D1 配置
 
 主站（*.pages.dev）在国内访问可能偏慢，本仓库前端是**纯静态**的，
 可以部署到任意静态托管作镜像，登录后在「设置」里把 API 主站指向
-`https://gongzuotai.pages.dev` 即可共用同一份数据。
+`https://gongzuotai-86d.pages.dev` 即可共用同一份数据。
 
 ## 自己部署
 
