@@ -1,0 +1,11 @@
+name = "gongzuotai"
+compatibility_date = "2026-10-31"
+pages_build_output_dir = "public"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "gongzuotai-db"
+database_id = "3bb4fd62-0182-4bbb-9ea1-00f030080ad3"
+
+[vars]
+APP_NAME = "张哥工作台"

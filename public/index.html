@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>张哥工作台 · 每日记录与待办</title>
+<style>
+  :root{--bg:#f4f6fb;--card:#fff;--ink:#17203a;--sub:#64708b;--line:#e3e8f2;--blue:#2f6bff;--blue-d:#1d4fd8;--ok:#12b76a;--err:#f04438;--amber:#f79009}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:"Microsoft YaHei UI","PingFang SC",system-ui,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh}
+  .wrap{max-width:860px;margin:0 auto;padding:22px 16px 70px}
+  header{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+  h1{font-size:21px}
+  .sub{color:var(--sub);font-size:13px}
+  .spacer{flex:1}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-top:14px;box-shadow:0 1px 2px rgba(16,24,40,.04)}
+  .card h2{font-size:15px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center}
+  input[type=text],input[type=date],input[type=password],textarea{background:#fff;border:1px solid var(--line);border-radius:9px;padding:9px 12px;font-size:14px;font-family:inherit;color:var(--ink);outline:none}
+  input:focus,textarea:focus{border-color:var(--blue)}
+  button{padding:8px 16px;border:none;border-radius:9px;font-size:14px;cursor:pointer;background:var(--blue);color:#fff}
+  button:hover{background:var(--blue-d)}
+  button.ghost{background:#fff;color:var(--ink);border:1px solid var(--line)}
+  button.danger{background:#fff;color:var(--err);border:1px solid #fecdca;padding:4px 10px;font-size:12px}
+  button:disabled{opacity:.5;cursor:not-allowed}
+  .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .item{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px dashed var(--line);font-size:14px}
+  .item:last-child{border-bottom:none}
+  .item .txt{flex:1;line-height:1.6;word-break:break-all}
+  .item .meta{color:var(--sub);font-size:12px;white-space:nowrap}
+  .item.done .txt{color:var(--sub);text-decoration:line-through}
+  .dayhead{font-size:13px;color:var(--sub);margin:14px 0 4px;font-weight:700;display:flex;gap:8px;align-items:center}
+  .dayhead .pill{background:#eef4ff;color:var(--blue);border-radius:99px;padding:2px 10px;font-size:12px}
+  .stat{display:flex;gap:10px;flex-wrap:wrap}
+  .stat .s{flex:1;min-width:110px;background:linear-gradient(180deg,#f8faff,#f1f5ff);border:1px solid var(--line);border-radius:12px;padding:12px;text-align:center}
+  .stat .s b{font-size:22px;display:block}
+  .stat .s span{font-size:12px;color:var(--sub)}
+  #chart{display:flex;gap:6px;align-items:flex-end;height:90px;margin-top:6px}
+  #chart .c{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:3px}
+  #chart .bar{width:100%;background:linear-gradient(180deg,#5b8bff,#2f6bff);border-radius:4px 4px 0 0;min-height:3px}
+  #chart .lb{font-size:10px;color:var(--sub);white-space:nowrap}
+  #chart .v{font-size:10px;color:var(--blue);font-weight:700}
+  #login{max-width:360px;margin:80px auto;text-align:center}
+  #login .card{padding:28px}
+  #toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);background:#101828;color:#fff;padding:10px 18px;border-radius:10px;font-size:13px;display:none;z-index:9}
+  .empty{color:var(--sub);font-size:13px;padding:6px 0}
+  .tabs{display:flex;gap:8px;margin-top:14px}
+  .tab{padding:8px 18px;border-radius:10px;background:#fff;border:1px solid var(--line);cursor:pointer;font-size:14px}
+  .tab.on{background:var(--blue);color:#fff;border-color:var(--blue)}
+  .chk{width:18px;height:18px;accent-color:var(--ok);cursor:pointer}
+</style>
+</head>
+<body>
+
+<!-- 登录 -->
+<div id="login" style="display:none">
+  <div class="card">
+    <h2 style="justify-content:center">🔐 张哥工作台</h2>
+    <p style="color:var(--sub);font-size:13px;margin-bottom:12px">输入口令进入（数据存在你的 Cloudflare D1）</p>
+    <input type="password" id="pcIn" placeholder="口令" style="width:100%" onkeydown="if(event.key==='Enter')doLogin()">
+    <div style="height:10px"></div>
+    <button style="width:100%" onclick="doLogin()">进入</button>
+  </div>
+</div>
+
+<!-- 主界面 -->
+<div class="wrap" id="main" style="display:none">
+  <header>
+    <h1>📋 张哥工作台</h1>
+    <span class="sub" id="todayTag"></span>
+    <span class="spacer"></span>
+    <button class="ghost" id="btnSettings">设置</button>
+  </header>
+
+  <div class="stat" style="margin-top:14px">
+    <div class="s"><b id="stTodayLogs">-</b><span>今天记录</span></div>
+    <div class="s"><b id="stOpen">-</b><span>待办未完</span></div>
+    <div class="s"><b id="stTodayDone">-</b><span>今天完成</span></div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab on" data-t="log">📝 每日记录</div>
+    <div class="tab" data-t="todo">✅ 待办清单</div>
+    <div class="tab" data-t="stat">📈 近两周</div>
+  </div>
+
+  <!-- 每日记录 -->
+  <div class="card" id="tab-log">
+    <div class="row">
+      <input type="date" id="dayPick" style="flex:0 0 auto">
+      <input type="text" id="logIn" placeholder="今天做了什么？回车快速记一条" style="flex:1" onkeydown="if(event.key==='Enter')addLog()">
+      <button onclick="addLog()">记一条</button>
+    </div>
+    <div id="logList" style="margin-top:8px"></div>
+  </div>
+
+  <!-- 待办 -->
+  <div class="card" id="tab-todo" style="display:none">
+    <div class="row">
+      <input type="text" id="todoIn" placeholder="要做什么？回车添加" style="flex:1" onkeydown="if(event.key==='Enter')addTodo()">
+      <button onclick="addTodo()">添加待办</button>
+    </div>
+    <div class="dayhead" style="margin-top:10px">未完成</div>
+    <div id="todoOpen"></div>
+    <div class="dayhead">已完成 <button class="ghost" style="font-size:12px;padding:3px 10px" onclick="clearDone()">清空已完成</button></div>
+    <div id="todoDone"></div>
+  </div>
+
+  <!-- 统计 -->
+  <div class="card" id="tab-stat" style="display:none">
+    <h2>近 14 天 · 每日记录条数</h2>
+    <div id="chart"></div>
+    <div class="empty" style="margin-top:8px">蓝柱 = 当天「做了什么」的条数；在待办页勾选完成会计入当日完成数。</div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const $=id=>document.getElementById(id);
+let passcode=localStorage.getItem("gz_pc")||"";
+let apiBase=localStorage.getItem("gz_api")||"";
+const LS="gongzuotai";
+function toast(m,ok=true){const t=$("toast");t.textContent=m;t.style.display="block";t.style.background=ok?"#101828":"#b42318";setTimeout(()=>t.style.display="none",2400)}
+function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")}
+// API 地址：默认同源；前端若部署在镜像域（如 here.now），自动回退到 Cloudflare 主站
+function api(){
+  if(apiBase)return apiBase.replace(/\/$/,"");
+  if(location.hostname.includes("pages.dev")||location.hostname.includes("jiuyeke.cn"))return "";
+  return "https://gongzuotai.pages.dev";
+}
+async function call(path,opts={}){
+  opts.headers=Object.assign({"X-Passcode":passcode,"Content-Type":"application/json"},opts.headers||{});
+  const r=await fetch(api()+"/api"+path,opts);
+  if(r.status===401){localStorage.removeItem("gz_pc");passcode="";showLogin();throw new Error("口令错误")}
+  const j=await r.json();
+  if(!r.ok||j.error)throw new Error(j.error||("HTTP "+r.status));
+  return j;
+}
+function localDay(offsetDays=0){const d=new Date();d.setDate(d.getDate()+offsetDays);return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`}
+function showLogin(){$("login").style.display="block";$("main").style.display="none"}
+function showMain(){$("login").style.display="none";$("main").style.display="block"}
+
+async function doLogin(){
+  passcode=$("pcIn").value.trim();
+  if(!passcode){toast("请输入口令",false);return}
+  try{ await call("/ping"); localStorage.setItem("gz_pc",passcode); showMain(); boot(); toast("已进入"); }
+  catch(e){ toast(e.message,false) }
+}
+
+document.querySelectorAll(".tab").forEach(tb=>tb.onclick=()=>{
+  document.querySelectorAll(".tab").forEach(x=>x.classList.remove("on"));
+  tb.classList.add("on");
+  ["log","todo","stat"].forEach(t=>$("tab-"+t).style.display=(tb.dataset.t===t)?"block":"none");
+  if(tb.dataset.t==="stat")loadStats();
+});
+
+let logs=[],todos=[];
+async function boot(){
+  $("dayPick").value=localDay();
+  $("todayTag").textContent="今天是 "+localDay();
+  await Promise.all([loadLogs(),loadTodos()]);
+  loadStats();
+}
+async function loadLogs(){
+  try{
+    const j=await call("/logs?recent=14");
+    logs=j.items||[];
+    renderLogs();
+  }catch(e){toast(e.message,false)}
+}
+function renderLogs(){
+  const byDay={};
+  logs.forEach(l=>{(byDay[l.day]=byDay[l.day]||[]).push(l)});
+  const days=Object.keys(byDay).sort().reverse();
+  $("logList").innerHTML=days.length?days.map(d=>`
+    <div class="dayhead">${d}（${d===localDay(0)?"今天":d===localDay(-1)?"昨天":""}）<span class="pill">${byDay[d].length}条</span></div>
+    ${byDay[d].map(l=>`<div class="item"><span class="txt">${esc(l.content)}</span><span class="meta">${(l.created_at||"").slice(11,16)}</span>
+      <button class="danger" onclick="delLog(${l.id})">删</button></div>`).join("")}`).join("")
+    :'<div class="empty">还没有记录。在上方输入框记第一条吧。</div>';
+}
+async function addLog(){
+  const content=$("logIn").value.trim();
+  if(!content){toast("写点内容",false);return}
+  try{
+    await call("/logs",{method:"POST",body:JSON.stringify({content,day:$("dayPick").value})});
+    $("logIn").value="";toast("已记录");loadLogs();loadStats();
+  }catch(e){toast(e.message,false)}
+}
+async function delLog(id){
+  try{ await call("/logs/"+id,{method:"DELETE"}); loadLogs(); loadStats(); }catch(e){toast(e.message,false)}
+}
+async function loadTodos(){
+  try{
+    const j=await call("/todos");
+    todos=j.items||[];
+    renderTodos();
+  }catch(e){toast(e.message,false)}
+}
+function renderTodos(){
+  const open=todos.filter(t=>!t.done), done=todos.filter(t=>t.done);
+  $("todoOpen").innerHTML=open.length?open.map(t=>`<div class="item">
+    <input type="checkbox" class="chk" onchange="toggleTodo(${t.id},this.checked)">
+    <span class="txt">${esc(t.content)}</span>
+    ${t.day?`<span class="meta">${t.day}</span>`:""}
+    <button class="danger" onclick="delTodo(${t.id})">删</button></div>`).join(""):'<div class="empty">没有未完成的待办 🎉</div>';
+  $("todoDone").innerHTML=done.length?done.map(t=>`<div class="item done">
+    <input type="checkbox" class="chk" checked onchange="toggleTodo(${t.id},false)">
+    <span class="txt">${esc(t.content)}</span>
+    <span class="meta">${(t.done_at||"").slice(0,16).replace("T"," ")}</span>
+    <button class="danger" onclick="delTodo(${t.id})">删</button></div>`).join(""):'<div class="empty">还没有完成记录。</div>';
+}
+async function addTodo(){
+  const content=$("todoIn").value.trim();
+  if(!content){toast("写点内容",false);return}
+  try{
+    await call("/todos",{method:"POST",body:JSON.stringify({content,day:localDay()})});
+    $("todoIn").value="";toast("已添加");loadTodos();loadStats();
+  }catch(e){toast(e.message,false)}
+}
+async function toggleTodo(id,done){
+  try{ await call("/todos/"+id,{method:"PATCH",body:JSON.stringify({done})}); loadTodos(); loadStats(); }
+  catch(e){toast(e.message,false);loadTodos()}
+}
+async function delTodo(id){
+  try{ await call("/todos/"+id,{method:"DELETE"}); loadTodos(); loadStats(); }catch(e){toast(e.message,false)}
+}
+async function clearDone(){
+  if(!confirm("清空全部已完成记录？"))return;
+  const done=todos.filter(t=>t.done);
+  for(const t of done){try{await call("/todos/"+t.id,{method:"DELETE"})}catch(e){}}
+  loadTodos();
+}
+async function loadStats(){
+  try{
+    const j=await call("/stats?days=14");
+    $("stOpen").textContent=j.openTodos;
+    const cmap={},dmap={};
+    (j.logs||[]).forEach(x=>cmap[x.day]=x.n);
+    (j.todosDone||[]).forEach(x=>dmap[x.day]=x.n);
+    $("stTodayLogs").textContent=cmap[localDay()]||0;
+    $("stTodayDone").textContent=dmap[localDay()]||0;
+    const days=[...Array(14)].map((_,i)=>localDay(i-13));
+    const max=Math.max(1,...days.map(d=>cmap[d]||0));
+    $("chart").innerHTML=days.map(d=>{
+      const n=cmap[d]||0, h=Math.round((n/max)*70);
+      return `<div class="c"><span class="v">${n||""}</span><div class="bar" style="height:${h}px;${d===localDay()?"outline:2px solid #f79009;outline-offset:1px":""}"></div><span class="lb">${d.slice(5)}</span></div>`;
+    }).join("");
+  }catch(e){}
+}
+$("btnSettings").onclick=()=>{
+  const v=prompt("API 主站地址（留空 = 同源，镜像部署时用 https://gongzuotai.pages.dev）：", apiBase|| (location.hostname.includes("pages.dev")||location.hostname.includes("jiuyeke.cn")?"":"https://gongzuotai.pages.dev"));
+  if(v!==null){apiBase=v.trim();localStorage.setItem("gz_api",apiBase);boot();toast("API 地址已更新")}
+};
+
+// 启动
+if(passcode){
+  fetch(api()+"/api/ping").then(()=>{ showMain(); boot(); }).catch(()=>showLogin());
+}else{
+  showLogin();
+}
+</script>
+</body>
+</html>
