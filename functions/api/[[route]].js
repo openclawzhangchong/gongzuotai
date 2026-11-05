@@ -55,7 +55,9 @@ export async function onRequest(context) {
       const b = await request.json();
       const content = String(b.content || "").trim();
       if (!content) return json({ error: "内容不能为空" }, 400);
-      const day = /^\d{4}-\d{2}-\d{2}$/.test(b.day || "") ? b.day : dateNow();
+      if (content.length > 2000) return json({ error: "单条记录不能超过 2000 字" }, 400);
+      // 真实日期校验：既匹配格式、又能被 Date 解析（拦下 2026-13-99 这类）
+      const day = (/^\d{4}-\d{2}-\d{2}$/.test(b.day || "") && !isNaN(Date.parse(b.day))) ? b.day : dateNow();
       const r = await db.prepare("INSERT INTO logs (day, content) VALUES (?, ?) RETURNING *").bind(day, content).run();
       return json({ ok: true, item: r.results[0] });
     }
@@ -104,7 +106,7 @@ export async function onRequest(context) {
       const days = Math.min(parseInt(url.searchParams.get("days") || "14", 10) || 14, 60);
       const logs = await db
         .prepare(`SELECT day, COUNT(*) AS n FROM logs
-                  WHERE day BETWEEN date('now','localtime', ?) AND date('now','localtime')
+                  WHERE day BETWEEN date('now', '+8 hours', ?) AND date('now', '+8 hours')
                   GROUP BY day`)
         .bind(`-${days - 1} days`)
         .all();
