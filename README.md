@@ -1,5 +1,9 @@
 # 📋 张哥工作台（每日工作台）
 
+[![Deploy Pages](https://github.com/openclawzhangchong/gongzuotai/actions/workflows/pages.yml/badge.svg)](https://github.com/openclawzhangchong/gongzuotai/actions/workflows/pages.yml)
+
+📄 **文档**：[开发手册](docs/DEVELOPMENT.md)（架构 / 数据契约 / 测试 / 二次开发指南）· [更新日志](CHANGELOG.md)
+
 一个部署在 **Cloudflare Pages + D1** 的个人工作台：**记录每天做了什么、还要做什么**。
 
 - 线上地址（主站）：**https://gongzuotai-86d.pages.dev**
