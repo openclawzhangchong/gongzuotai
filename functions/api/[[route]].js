@@ -109,10 +109,10 @@ export async function onRequest(context) {
         .bind(`-${days - 1} days`)
         .all();
       const todos = await db
-        .prepare(`SELECT date(done_at) AS day, COUNT(*) AS n FROM todos
+        .prepare(`SELECT date(done_at, '+8 hours') AS day, COUNT(*) AS n FROM todos
                   WHERE done = 1 AND done_at IS NOT NULL
-                    AND date(done_at) BETWEEN date('now','localtime', ?) AND date('now','localtime')
-                  GROUP BY date(done_at)`)
+                    AND date(done_at, '+8 hours') BETWEEN date('now', '+8 hours', ?) AND date('now', '+8 hours')
+                  GROUP BY date(done_at, '+8 hours')`)
         .bind(`-${days - 1} days`)
         .all();
       const open = await db.prepare("SELECT COUNT(*) AS n FROM todos WHERE done = 0").all();

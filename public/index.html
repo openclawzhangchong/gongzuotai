@@ -126,7 +126,7 @@ function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").repl
 function api(){
   if(apiBase)return apiBase.replace(/\/$/,"");
   if(location.hostname.includes("pages.dev")||location.hostname.includes("jiuyeke.cn"))return "";
-  return "https://gongzuotai.pages.dev";
+  return "https://gongzuotai-86d.pages.dev";
 }
 async function call(path,opts={}){
   opts.headers=Object.assign({"X-Passcode":passcode,"Content-Type":"application/json"},opts.headers||{});
@@ -248,7 +248,7 @@ async function loadStats(){
   }catch(e){}
 }
 $("btnSettings").onclick=()=>{
-  const v=prompt("API 主站地址（留空 = 同源，镜像部署时用 https://gongzuotai.pages.dev）：", apiBase|| (location.hostname.includes("pages.dev")||location.hostname.includes("jiuyeke.cn")?"":"https://gongzuotai.pages.dev"));
+  const v=prompt("API 主站地址（留空 = 同源，镜像部署时用 https://gongzuotai-86d.pages.dev）：", apiBase|| (location.hostname.includes("pages.dev")||location.hostname.includes("jiuyeke.cn")?"":"https://gongzuotai-86d.pages.dev"));
   if(v!==null){apiBase=v.trim();localStorage.setItem("gz_api",apiBase);boot();toast("API 地址已更新")}
 };
 
